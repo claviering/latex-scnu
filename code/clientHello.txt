@@ -1,0 +1,15 @@
+uint16 ProtocolVersion;
+opaque Random[32];
+
+/* Cryptographic suite selector */
+uint8 CipherSuite[2];    
+
+struct {
+    /* TLS v1.2 */
+    ProtocolVersion legacy_version = 0x0303;    
+    Random random;
+    opaque legacy_session_id<0..32>;
+    CipherSuite cipher_suites<2..2^16-2>;
+    opaque legacy_compression_methods<1..2^8-1>;
+    Extension extensions<8..2^16-1>;
+} ClientHello;

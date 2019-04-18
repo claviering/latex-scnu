@@ -1,0 +1,24 @@
+\section{AEAD}
+\label{sec:B}
+% FRC 7539
+
+AEAD 算法实现: ChaCha20 流加密算法。第一步用常量、密钥、计数器初始化矩阵。第二步初始矩阵置换，包括10轮行置换和10轮列置换，共20轮运算，其中1轮操作需要4次四分之一置换操作。第三步生成密钥流。变换后的矩阵和初始化矩阵相加，得到512位的密钥比特流。第三步加密。密钥比特流和明文异或
+
+初始化矩阵
+\lstinputlisting[firstline=17, lastline=37,xleftmargin=2em,framexleftmargin=1.5em]{./code/chacha20-poly.js}
+
+四分之一轮变换
+\lstinputlisting[firstline=39, lastline=44,xleftmargin=2em,framexleftmargin=1.5em]{./code/chacha20-poly.js}
+
+poly1305算法: 输入32字节的密钥和任意长度的消息比特流，输入16字节的 MAC。将密钥分为8字节两部分，做预处理。poly1305的密钥使用 ChaCha20 变换后的矩阵。
+
+伪代码:
+\begin{lstlisting}[language=perl,xleftmargin=2em,framexleftmargin=1.5em]
+poly1305_key_gen(key,nonce):
+  counter = 0
+  block = chacha20_block(key,counter,nonce)
+  return block[0..31]
+  end
+\end{lstlisting}
+
+\newpage

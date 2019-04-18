@@ -1,0 +1,14 @@
+\appendix
+\ctexset { section = { name={附录},number={\Alph {section}}, format={\centering \zihao {-2}\bfseries } } } 
+\titleformat{\subsection}{\zihao{-3}\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\zihao{4}\bfseries}{\thesubsubsection}{1em}{}
+\ctexset { paragraph = { ,format={\raggedright \bfseries \zihao {-4}} } }
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\sectionmark}[1]{\markboth{附录\Alph{section}\ \ #1}{}}
+\fancyhead[C]{\thesistitlefancyhead{}} % 页眉设置为论文标题
+\fancyfoot[C]{\thepage}
+\makeatletter
+\@addtoreset{equation}{section}
+\makeatother
+\renewcommand{\theequation}{\Alph{section}.\arabic{equation}}

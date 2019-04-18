@@ -1,0 +1,12 @@
+\subsection{零轮往返时长协议发生条件}
+
+在 TLS 1.3 版本中，零轮往返时长需要发生在一轮往返握手之后，一轮往返握手又分为两种：完整的握手和不发送 early\_data 的 PSK 握手。完整握手中客户端发送 ClientHello，Extension 带上客户端所有支持的椭圆曲线类型，并且计算每个椭圆曲线的公钥和私钥，私钥缓存，公钥放在 Extension 中的 key\_share 中发送给服务器。服务器端接收到客户端发送的 ClientHello 后，选择客户端支持的加密套件，如椭圆曲线参数(曲线、基点)，计算自己的公钥和私钥，然后从客户端发送过来 ClientHello 中的 key\_share 拓展中选择对应的椭圆曲线公钥，并用私钥计算预主密钥。
+
+服务器端回复 ServerHello、 Certificate、Certificate Verify、 Finished 报文，其中 ServerHello 中的 key\_share 拓展发送选择的椭圆曲线和公钥。
+客户端收到 ServerHello 后，从 key\_share 拓展中取出服务器发送的公钥，与自己的私钥计算预主密钥，得到预主密钥，通过一系列的 HKDF 函数计算导出其他主密钥。因为客户端和服务器端 early\_secret和协商出来的预主密钥相同，因此所有后续进过 HKDF 函数导出的对应的密钥都是相同的。发送 Finished 消息后，完成了整个握手过程。通过 master\_secret 和整个握手的摘要，计算 resumption\_secret。服务端收到客户端的 Finished 消息后，通过验证后，同样计算 resumption\_secret。握手完成之后，服务器可以在以后的任意时刻发生 NewSessionTicket，NewSessionTicket 使用server\_application\_traffic\_secret 加密。
+
+在加密的 Ticket 中，相比 TLS 1.2，包含了当前的创建时间，因此可以方便的配置和验证 Ticket 的过期时间。
+在 PSK 握手中，一旦初次握手已经完成，服务器端就能给客户端发送一个与独特密钥对应的 PSK，这个密钥来自初次握手。客户端可以在将来的握手中使用该 PSK。 如果服务器端接受了客户端发送的 PSK，则新连接的安全上下文与原始连接相关联，并且使用从初始握手导出的密钥来引导加密状态而不是完全握手。PSK可以与（EC）DHE密钥交换一起使用，以提供与共享密钥相结合的前向保密，或者可以单独使用，以牺牲保密性为代价。
+
+当服务器端通过 PSK 进行身份验证时，它不会发送 Certificate 或 CertificateVerify 消息。当客户端通过 PSK 恢复时，它还应该为服务器端提供一个 key\_share 扩展，以允许 服务器端拒绝恢复使用之前的连接状态，如果需要，可以恢复到完全握手。 服务器端用 pre\_shared\_key 扩展进行响应以协商使用 PSK 密钥建立，并且可以用 key\_share 扩展来响应（EC）DHE密钥建立，从而提供前向保密。客户端为了使用 PSK 进行握手，必须发送一个 psk\_key\_exchange\_modes 扩展。这个扩展语意是客户端仅支持使用具有这些模式的 PSK。这就限制了在这个 ClientHello 中提供的 PSK 的使用，也限制了服务器端通过 NewSessionTicket 提供的 PSK 的使用。
+0-RTT 降级到 1-RTT：服务器端拒绝 PSK 握手，ServerHello 中不加入 pre\_shared\_key，服务器端拒绝 early\_data。ServerHello 中加入了 pre\_shared\_key 但是 Encrypted Extension 报文中不加入 early\_data

@@ -1,0 +1,11 @@
+*.log
+*.gz
+*.aux
+*.bbl
+*.blg
+*.out
+*.toc
+**/dist
+**/log
+**/logs
+**/*.log

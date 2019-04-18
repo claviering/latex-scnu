@@ -1,0 +1,31 @@
+\subsection{零轮往返时长协议介绍}
+
+零轮往返时长协议(下面简称 0-RTT)是 TLS 1.3 协议的一个重要的新功能，应用层数据加密后和客户端的 ClientHello 一起发送到服务器，不需要客户端和服务器的往返协商密钥，能提升页面加载速度。其中 0-RTT 握手的的前置条件： 
+
+1. 服务器在前一次完整握手中，发送了 NewSessionTicket，并且 NewSessionTic\-ket 中存在 max\_early\_data\_size 扩展表示愿意接受 early\_data。如果没有这个扩展，0-RTT 无法开启。
+
+2. 在 PSK 会话恢复的过程中，ClientHello 的扩展中配置了 early\_data 扩展，表示客户端想要开启 0-RTT 模式。
+
+3. 服务器在回复 0-RTT 的 ClientHello 中发送的 Encrypted Extensions 消息中携带了 early\_data 扩展表示同意读取 early\_data。
+
+0-RTT 的握手发送条件： 
+
+1. 不是第一次握手的连接。
+
+2. 非第一次握手时：客户端发送了 PSK 和 early\_data 拓展。
+
+3. 服务器读取 early\_data。0-RTT 模式开启成功。当客户端和服务器都支持 TLS 1.3 时，客户端会将收到服务器发送过来的 NewSessionTicket，和通过自己发送 Finished 后计算得到的 Resumption Secret，两者一起组成 PSK。
+
+% The PSK associated with the ticket is computed as:
+% max_early_data_size:
+% 这个字段表示使用 ticket 时允许 Client 发送的最大 0-RTT 数据量(以字节为单位)。数据量仅计算应用数据有效载荷(即，明文但不填充或内部内容类型字节)。服务器如果接收的数据大小超过了 max_early_data_size 字节的 0-RTT 数据，应该立即使用 "unexpected_message" alert 消息终止连接。请注意，由于缺少加密材料而拒绝 early data 的 服务器将无法区分内容中的填充部分，因此 Client 不应该依赖于能够在 early data 记录中发送大量填充内容
+% HKDF-Expand-Label(resumption_master_secret,
+%                  "resumption", ticket_nonce, Hash.length)
+% Because the ticket_nonce value is distinct for each NewSessionTicket message, a different PSK will be derived for each ticket.
+
+客户端收到 NewSessionTicket 消息后，将收到的 Ticket 和客户端本地发送 Finished 消息后计算的 resumption\_secret，两者一起组成了 PSK，将该 PSK 缓存在本地，ServerName 作为缓存的 Key，缓存时间不可以超过 7 天。当进行会话恢复时，客户端在本地缓存中查找 ServerName 对应的 PSK，用在发送的 ClientHello 的 PSK 扩展中，PSK 拓展会包含两部分： Identity 和 Binder。其中 Identity 是 服务器发送过来 NewSessionTicket 中加密的 Ticket，Binder 是一个 HMAC，是从之前客户端发送 Finised 计算的 Resumption Secret 导出 early\_secret，进而导出 binder\_key 和 binder\_mac\_key，使用 binder\_mac\_key 对不包含 PSK 部分的 ClientHello 计算 HMAC。
+
+发送 ClientHello 后，使用 resumption\_secret 导出的 early\_secret 加密 early\_data 后发送。服务器会从 ClientHello 中 验证 Binder，当验证通过时，使用 PSK 通过 HKDF 函数导出密钥，然后解密刚才发过来的 early\_data。
+服务器收到客户端的 ClientHello 之后，生成 key\_share，检查 ClienHello 的 PSK 扩展，解密 Ticket，此 Ticker 在客户端看不有什么意义，但服务器能正确解读，继续查看该 Ticket 是否过期，检查客户端发送的版本算法等协商结果是否可用，然后使用 Ticket 中的 resumption\_secret计算 ClientHello 的 HMAC，检查 Binder 是否正确。验证完 Ticket 和 Binder 之后，和客户端一样，从 resumtion\_secret 中导出 EarlyData 使用的密钥，然后解密客户端发送过来的 EarlyData。
+
+发送 ServerHello 中表示使用了 PSK 进行握手，以及哪个 PSK。 在服务端，TLS 1.3 只使用过去的 resumption\_secret 导出 early\_data 的密钥，但是之后的握手和通信的主密钥会和临时 DH 密钥一起导出。如果服务器在 Encrypted Extensions 中发送了 early\_data 扩展，则客户端必须在收到服务器的 Finished 消息后发送 EndOfEarlyData 消息。如果服务器没有在 EncryptedExtensions 中发送 early\_data 扩展，那么客户端绝不能发送 EndOfEarlyData 消息。收到客户端发送的 EndOfEarlyData 后，切换到应用程序密钥，此消息表示已传输完了所有 0-RTT application\_data消息(如果有)。服务器不能发送此消息，Client 如果收到了这条消息，那么必须使用 "unexpected\_message" alert 消息终止连接。这条消息使用从 client\_early\_traffic\_\-secret 中派生出来的密钥进行加密保护。 至此完成了该 0-RTT 会话恢复的过程。

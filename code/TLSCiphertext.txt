@@ -1,0 +1,14 @@
+struct {
+    opaque content[TLSPlaintext.length];
+    ContentType type;
+    uint8 zeros[length_of_padding];
+} TLSInnerPlaintext;
+
+struct {
+    /* 23 */
+    ContentType opaque_type = application_data; 
+    /* TLS v1.2 */
+    ProtocolVersion legacy_record_version = 0x0303; 
+    uint16 length;
+    opaque encrypted_record[TLSCiphertext.length];
+} TLSCiphertext;

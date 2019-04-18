@@ -1,0 +1,14 @@
+\setcounter{page}{1}
+\pagenumbering{Roman}
+\begin{center}
+  \addcontentsline{toc}{section}{摘要}
+  \zihao{-2} \bfseries 摘\quad 要
+\end{center}
+\begin{spacing}{1.5}
+  \zihao{-4}
+    分析传输层协议中使用的零轮往返时长协议存在的重放攻击，编程实现简单传输层协议，重现相关重放攻击，并分别实现四种方法抵抗重放攻击。方法一：检查客户端发送零轮往返的 Ticker 是否过期。方法二：检查客户端发送零轮往返的 Ticker 是否被使用。方法三：服务器只接受零轮往返幂等性的请求。方法四：添加 Early-Data 请求头，告知服务器此请求是早期数据请求，服务器根据实际情况判断是否接受早期数据。进过测试分析得出，方法一、方法二和方法四组合能达到最优效果，保证服务器能正常处理早期数据的同时不受零轮往返时长重放攻击的影响。
+    \ \\
+    \textbf{关键词: }传输层协议；零轮往返时长；早期数据；重放攻击
+\end{spacing}
+
+\newpage

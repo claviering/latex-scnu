@@ -1,0 +1,15 @@
+enum {
+    invalid(0),
+    change_cipher_spec(20),
+    alert(21),
+    handshake(22),
+    application_data(23),
+    (255)
+} ContentType;
+
+struct {
+    ContentType type;
+    ProtocolVersion legacy_record_version;
+    uint16 length;
+    opaque fragment[TLSPlaintext.length];
+} TLSPlaintext;

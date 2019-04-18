@@ -1,0 +1,16 @@
+\section{HKDF}
+\label{sec:A}
+
+HKDF 第一步: 提取，对输入的初始密钥材料进行提取，输出固定长度的伪随机密钥(PRK)
+
+\lstinputlisting[firstline=16, lastline=21,xleftmargin=2em,framexleftmargin=1.5em]{./code/HKDF.js}
+
+HKDF 第二步: 拓展。将第一步的伪随机密钥做拓展，输出密钥材料(OKM)
+
+\lstinputlisting[firstline=24, lastline=53,xleftmargin=2em,framexleftmargin=1.5em]{./code/HKDF.js}
+
+完整的 HKDF 函数，进行一次提取和一次拓展
+
+\lstinputlisting[firstline=55, lastline=64,xleftmargin=2em,framexleftmargin=1.5em]{./code/HKDF.js}
+
+\newpage

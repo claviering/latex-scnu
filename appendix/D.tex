@@ -1,0 +1,13 @@
+\section{密钥导出流程图}
+
+\lstinputlisting[language=C,numbers=none,xleftmargin=2em,framexleftmargin=1.5em]{./code/密钥导出.txt}
+
+几点说明：
+
+\begin{itemize}
+  \item HKDF-Extract 画在图上，它为从顶部获取 Salt 参数，从左侧获取 IKM 参数，它的输出是底部，和右侧输出的名称。
+  \item Derive-Secret 的 Secret 参数由传入的箭头指示。例如，Early Secret 是生成 client\_early\_traffic\_secret 的 Secret。
+  \item "0" 表示将 Hash.length 字节的字符串设置为零。
+\end{itemize}
+
+\newpage

@@ -1,0 +1,19 @@
+\subsection{密钥导出算法}
+
+在 TLS 1.3 中，不再使用 PRF 算法，而是采用更标准的 HKDF 算法来进行密钥的推导。而且在 TLS 1.3 中对密钥进行了更细粒度的优化，每个阶段或者方向的加密都不是使用同一个密钥。TLS 1.3 在 ServerHello 消息之后的数据都是加密的，握手期间服务器给客户端发送的消息用 server\_handshake\_traffic\_secret 通过 HKDF 算法导出的密钥加密的，Client 发送给 Server 的握手消息是用 client\_handshake\_traffic\-\_secret 通过 HKDF 算法导出的密钥加密的。这两个密钥是通过 Handshake Secret 密钥来导出的，而 Handshake Secret 密钥又是由 PreMasterSecret 和 Early Secret 密钥导出，然后通过 Handshake Secret 密钥导出主密钥 Master Secret。
+
+再由主密钥 Master Secret 导出这几个密钥： client\_application\_traffic\_secret：用来导出客户端发送给服务器应用数据的对称加密密钥。server\_application\_traffic\_s\-ecret：用来导出服务器发送给客户端应用数据的对称加密密钥。resumption\_master\_\\secret：用来生成 PSK。最终 server\_handshake\_traffic\_secret、client\_handshake\_traffic\_\\secret、 client\_application\_\-traffic\_secret、server\_application\_traffic\_secret 这 4 个密钥会分别生成 4 套 write\_key 和 write\_IV 用于对称加密。如果用到 early\_data，还需要 client\_e\-arly\_traffic\_secret，它也会生成 1 套 write\_key 和 write\_IV 用于加密和解密 0-RTT 数据。Key Derivation Function (KDF) 是密码学系统中必要的组件。它的目的是把一个 key 拓展成多个从密码学角度来上说是安全的 key。
+
+TLS 1.3 使用的是 HMAC-based Extract-and-Expand Key Derivation Function 即 HKDF 函数，HKDF 根据 extract-then-expand 设计模式，即 KDF 有 2 大模块。第一个阶段是将输入的 key material 进行 "extracts"，得到固定长度的 key，然后第二阶段将这个 key "expands" 成多个附加的伪随机的 key，输出的 key 的长度和个数，取决于指定的加密算法。由于 extract 流程不是必须的，所以 expand 流程可以独立的使用。HMAC 的两个参数，第一个是 key，第二个是 data。data 可以由好几个元素组成，一般用 | 来表示
+
+经过密钥协商得出来的密钥材料的随机性可能不够，协商的过程能被攻击者获知，需要使用一种密钥导出函数来从初始密钥材料（PSK 或者 DH 密钥协商计算出来的 key）中获得安全性更强的密钥。HKDF 正是 TLS 1.3 中所使用的这样一个算法，使用协商出来的密钥材料和握手阶段报文的哈希值作为输入，可以输出安全性更强的新密钥。在 TLS 1.2 中使用的密钥导出函数 PRF 实际上只实现了 HKDF 的 expand 部分，并没有经过 extract，而直接假设密钥材料的随机性已经符合要求。因为 TLS 1.3 对密钥材料进行 extract\_then\_expand，所以这也是为什么 TLS 1.3 比 TLS 1.2 在安全性上更上一层楼的原因。TLS 1.3 中的所有密钥都是由 HKDF-Extract(salt, IKM) 和 Derive-Secret(Secret, Label, Messages) 联合导出的。其中 Salt 是当前的 secret 状态，输入密钥材料(IKM)是要添加的新 secret 。在 TLS 1.3 中，两个输入的 IKM 是: PSK 或者 (EC)DHE 共享 的 secret。一旦计算出了从给定 secret 派生出的所有值，就应该删除该 secret。
+
+% TLS 1.3 中的 Finished 并不算是整个握手中的第一条加密消息，作用和 TLS 1.2 是相同的，它对提供握手和计算密钥的身份验证起了至关重要的作用。 Authentication 消息的计算统一采用以下的输入方式: 1. 要使用证书和签名密钥 2. 握手上下文由哈希副本中的一段消息集组成 3. Base key 用于计算 MAC 的密钥。Finished 子消息根据 Transcript-Hash(Handshake Context, Certificate, CertificateVerify) 的值得出的 MAC 。使用从 Base key 派生出来的 MAC key 计算的 MAC 值。用于计算 Finished 消息的密钥是使用 HKDF，Base Key 是 server\_handshake\_traffic\_ secret 和 client\_handshake\_traffic\_secret。
+
+% 如果使用同一个密钥加密大量的数据，攻击者有几率可以通过记录所有密文并找出特征，逆推出对称加密密钥。因此需要引进一个密钥同步更新的机制，该机制同时也使用 HKDF 算法，在旧密钥的基础上衍生出新一轮的密钥。当加密的报文达到一定长度后，双方也需要发送 KeyUpdate 报文重新计算加密密钥。KeyUpdate 握手消息用于表示发送方正在更新其自己的发送加密密钥。任何对等方在发送 Finished 消息后都可以发送此消息。在接收 Finished 消息之前接收 KeyUpdate 消息的，实现方必须使用 "unexpected\_message" alert 消息终止连接。发送 KeyUpdate 消息后，发送方应使用新一代的密钥发送其所有流量。收到 KeyUpdate 后，接收方必须更新其接收密钥。
+
+% 下一代 application\_traffic\_secret 计算方法如下
+
+% \lstinputlisting[language=C,xleftmargin=2em,framexleftmargin=1.5em]{./code/key-update.txt}
+
+% \newpage
