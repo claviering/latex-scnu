@@ -3,10 +3,9 @@
   \zihao{-2}
   Abstract
 \end{center}
-\begin{spacing}{1.5}
+
   \zihao{-4}
   A replay attack is a form of network attack in which a valid data transmission is maliciously or fraudulently repeated or delayed. It is mainly used in the identity authentication process and destroys the correctness of authentication. In this paper, I analyze the replay attacks that exist in the zero round-trip time protocol used in the transport layer protocol. Programming to implement a simple transport layer protocol, then I reproduce the relevant replay attacks by programming and implement four methods to resist the replay attack protocol. The methods are as follows. First, examine whether the Ticker sent by the client to the zero round trip expires. Second, examine whether the Ticker sent by the client to the zero round trip is used. Third, make the server only accept zero rounds of idempotent requests. Fourth, add an Early-Data request header to inform the server that this request is an early data request, allowing the server to determine whether to accept early data based on actual conditions. After testing and analysis, I conclude that the combination of the first, the second and the fourth method can achieve the best effect, ensuring that the server can process the early data normally without being affected by the zero round-trip time replay attack.
   \ \\
   \textbf{Keywords: }0-RTT, TLS 1.3, Early Data,\ Replay Attacks
-\end{spacing}
 \newpage

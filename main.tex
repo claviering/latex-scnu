@@ -5,6 +5,7 @@
 \begin{document}
 
 \input{cover/image} % 封面
+\begin{spacing}{1.5}
 % \input{state-auth/index} % 声明和授权 根据需要打印
 \input{abstract/abstract-zh-CN} % 中文摘要
 \input{abstract/abstract-en} % 英文摘要
@@ -12,18 +13,15 @@
 
 % 计算页码
 \setboolean{@twoside}{true}
-\begin{spacing}{1.5}
 \zihao{-4}
 \setcounter{page}{1}
 \pagenumbering{arabic}
 
 \input{body/index} % 论文正文
 \input{appendix/index} % 附录
-
-\end{spacing}
-
 \input{reference/index} % 参考文献
 \input{thanks/index} % 致谢
+\end{spacing}
 
 % 结束计算页码
 \setboolean{@twoside}{false}

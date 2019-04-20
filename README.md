@@ -116,6 +116,8 @@ SEO: 华师毕业论文模板, 华师本科毕业论文模板, 华师论文模�
 
 ## 页眉设置
 
+main.cls 78行
+
 `\newcommand{\thesistitlefancyhead}{论文题目设置为页眉} % 定义论文题目为页眉`
 
 </center>
