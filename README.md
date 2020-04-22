@@ -131,7 +131,7 @@ main.cls 78行
   \renewcommand{\algorithmicensure}{ \textbf{Output:}} %Use Output in the format of Algorithm [optional]
 
   \begin{algorithm}[htbp]
-      \caption{Fault Injection Algorithm}
+      \caption{Power with self}
       \label{al:inject}
       \begin{algorithmic}
           \REQUIRE Number a
