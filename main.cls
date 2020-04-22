@@ -15,6 +15,9 @@
 \RequirePackage{float} % Required for the Here float
 \RequirePackage{graphicx} % Required to insert images
 \RequirePackage{wrapfig}
+\RequirePackage{algorithm}
+\RequirePackage{algorithmic}
+\RequirePackage{subfigure}
 \RequirePackage{booktabs} % Required for the hline of the three lines table
 \RequirePackage{multirow} % Required for the multirow of table
 \RequirePackage{listings} % Required for insertion of code
