@@ -122,6 +122,31 @@ main.cls 78行
 
 </center>
 
+## 算法定义的使用
+为实现类似CLRS中算法的样式，使用了`algorithms`宏包。
+
+使用范例：
+```latex
+  \renewcommand{\algorithmicrequire}{ \textbf{Input:}} %Use Input in the format of Algorithm [optional]
+  \renewcommand{\algorithmicensure}{ \textbf{Output:}} %Use Output in the format of Algorithm [optional]
+
+  \begin{algorithm}[htbp]
+      \caption{Fault Injection Algorithm}
+      \label{al:inject}
+      \begin{algorithmic}
+          \REQUIRE Number a
+          \ENSURE $a^a$
+          \STATE ~~\\
+          \STATE Mul(a)
+          \STATE tmp = a
+            \FOR{l := 1 to a}
+                tmp = tmp * a
+            \ENDFOR
+      \end{algorithmic}
+  \end{algorithm}
+```
+
+
 ## 参考
 
 > [Github](https://github.com/yujunhui/scnuthesis)
