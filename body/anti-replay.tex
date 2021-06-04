@@ -40,7 +40,6 @@
 
 通过共享数据库可以防止第二种攻击，以保证集群中的系统最多接受一次 0-RTT 数据，最多响应一次。使用 Ticker 共享，多个服务器使用同一个 Redis 数据库保存 Ticker，维护 Ticker 在分布式系统的的唯一性，群集中的服务器都将生成的 Ticker 保存到公共 Redis 数据库，统一维护 Ticker 唯一性和有效期。当集群中某一台服务器接收到 0-RTT 的时候，首先去查询数据库对应的 Ticker，如果是第一次发送并非重放攻击，并且此 Ticker 没有过期，下一步检查 Binder 的正确性。当攻击者重放 0-RTT 的时候，负载均衡会将请求分发都没个后台服务，当其中一个请求查询 Ticker 时候，可以设置锁定数据库，防止重复读取合法的 Ticker。
 
-\afterpage{\null\newpage}
 
 % 设置 max\_early\_data\_size 大小，以允许客户端发送指定大小的 early data
 % max\_early\_data\_size：使用此票证时允许客户端发送的最大0-RTT数据量（以字节为单位）。 仅计算应用数据有效载荷（即，明文但不填充或内部内容类型字节）。 接收超过max\_early\_data\_size字节的0-RTT数据的服务器应该使用“unexpected\_message”警报终止连接。
