@@ -56,3 +56,6 @@
   \end{enumerate}
 
   服务器参数和认证消息这里不展开详细说明。Certificate: 将证书链发送给对方，当约定的密钥交换方法是用证书进行认证的时候，服务器就必须发送 Certificate 消息，当且仅当客户端通过发送 CertificateRequest 消息请求认证客户端时，客户端必须发送 Certificate 消息，当客户端没有合适的证书时，必须发送不含证书的 Certificate 消息。Certificate Verify: 此消息用于证明发送方拥有其证书对应的私钥，必须在 Certificate 消息之后立即发送，并且紧接着在 Finished 消息之前。Finished: 提供握手和密钥的身份验证，Finished 消息的接受者必须验证内容是否正确，如果不正确，必须使用 decrypt\_error alert 消息终止连接。End of Early Data: 如果服务器在 EncryptedExtensions 中发送了 early\_data 扩展，则客户端必须在收到服务器的 Finished 消息后发送 EndOfEarlyData 消息。
+
+\input{body/key/index}
+\input{body/AEAD}
